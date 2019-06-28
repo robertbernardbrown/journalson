@@ -1,15 +1,14 @@
 'use strict';
 
+require('dotenv').config()
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 5000;
+const bodyParser = require('body-parser')
 const firebase = require("firebase");
-
-// config
-require('dotenv').config()
 const envVars = process.env;
 
-var firebaseConfig = {
+const firebaseConfig = {
   apiKey: envVars.apiKey,
   authDomain: envVars.authDomain,
   databaseURL: envVars.databaseURL,
@@ -18,14 +17,34 @@ var firebaseConfig = {
   messagingSenderId: envVars.messagingSenderId,
   appId: envVars.appId
 };
-
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-var database = firebase.database();
+const database = firebase.database();
+const userRef = database.ref(`users`);
+
+app.use(bodyParser.json())
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
 app.get('/express_backend', (req, res) => {
   res.send({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' });
 });
+
+app.post('/users', (req, res) => {
+  let { username, email, imageUrl } = req.body; 
+  let user = createNewUser(username, email, imageUrl);
+  console.log('wrote data');  
+  res.send(user);
+});
+
+userRef.on('value', function(snapshot) {
+  console.log(snapshot.val());
+});
+
+function createNewUser(username, email, imageUrl) {
+  return userRef.push({
+    username: username,
+    email: email,
+    profile_picture : imageUrl
+  });
+}
