@@ -31,15 +31,22 @@ app.get('/express_backend', (req, res) => {
 });
 
 app.post('/users', async (req, res) => {
-  let { username, email, imageUrl } = req.body;
+  let { username, password } = req.body;
 
-  let user = await userRef.once('value');
+  const provider = new firebase.auth.GoogleAuthProvider();
+
+  let user;
+  try {
+    user = firebase.auth().signInWithRedirect(provider);
+  } catch (err) {
+    console.log(err);
+  }
 
   console.log(user);
 
   if (!user) {
     try {
-      createNewUser(username, email, imageUrl);
+      createNewUser(username, password);
     } catch (err) {
       console.log(err);
     }
