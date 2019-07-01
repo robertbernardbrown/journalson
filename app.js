@@ -30,10 +30,22 @@ app.get('/express_backend', (req, res) => {
   res.send({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' });
 });
 
-app.post('/users', (req, res) => {
-  let { username, email, imageUrl } = req.body; 
-  let user = createNewUser(username, email, imageUrl);
-  console.log('wrote data');  
+app.post('/users', async (req, res) => {
+  let { username, email, imageUrl } = req.body;
+
+  let user = await userRef.once('value');
+
+  console.log(user);
+
+  if (!user) {
+    try {
+      createNewUser(username, email, imageUrl);
+    } catch (err) {
+      console.log(err);
+    }
+    console.log('wrote data');
+  }
+  
   res.send(user);
 });
 
